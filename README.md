@@ -2,7 +2,7 @@
 
 Global Music Trends is a youtube playlist which lists outs the trending music videos from youtube across its all regions.
 
-- [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PL72oe0cchPorz0uL-LWBv4vxEKcF5999Z)
+- [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)
 - [Website](https://360modder.github.io/global-music-trends/)
 
 The only criteria to add videos to playlist is that, the music video should trend in at least 2 countries.

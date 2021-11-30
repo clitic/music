@@ -1,24 +1,147 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from tqdm import tqdm
-from .utils import get_response_item_ids
 
 
-class Playlists:
+class _Messages:
+    """custom class for messages
+    """
+    add_msg = "adding videos"
+    rm_msg = "removing videos"
     
-    def __init__(self, youtube: Any, playlist_id: str, progress_bars: Optional[bool] = False) -> None:
+class Playlists:
+    """Playlists class to interact with youtube playlists
+    """
+    
+    def __init__(self, playlist_id: str, youtube: Any, snippet: Optional[bool] = False, progress_bars: Optional[bool] = False) -> None:
         """Playlists class to interact with youtube playlists
 
+        cost = 1 for playlist information + 1 per page for 50 max results
+
         Args:
-            youtube (Any): a resource object with methods for interacting with the service.
             playlist_id (str): playlist id
+            youtube (Any): a resource object with methods for interacting with the service.
+            snippet (Optional[bool], optional): request playlist items with snippet part for more info. Defaults to False.
             progress_bars (Optional[bool], optional): display task status with progress bars. Defaults to False.
-        """
-        self.youtube = youtube
-        self.playlist_id = playlist_id
-        self.progress_bars = progress_bars
         
-    def add_video(self, video_id: str) -> dict:
-        """add videos to intialized playlist
+        Note:
+            most of the methods require OAuth client access
+                
+        Examples:
+            >>> pl = Playlists("PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ", youtube)
+            >>> pl.responses
+            >>> pl.video_ids
+        """
+        self._youtube, self._snippet, self._progress_bars = youtube, snippet, progress_bars 
+        self.playlist_id = playlist_id
+        self.link = f"https://www.youtube.com/playlist?list={playlist_id}"
+        self.cost = 0
+        self.title, self.desc, self.status = self._playlist_info()
+        self.responses = self._pl_responses(snippet=self._snippet)
+        self._playlist_items = self._playlist_item_ids()
+        self.video_ids = list(self._playlist_items.keys())
+        
+    def __len__(self) -> int:
+        return self.responses[0]["pageInfo"]["totalResults"]
+
+    def _playlist_info(self) -> Tuple[str, str, str]:
+        request = self._youtube.playlists().list(part="id,snippet,status", id=self.playlist_id)
+        response = request.execute()
+        self.cost += 1
+        title = response["items"][0]["snippet"]["title"]
+        desc = response["items"][0]["snippet"]["description"]
+        status = response["items"][0]["status"]["privacyStatus"]
+
+        return title, desc, status         
+
+    def _pl_responses(self, playlist_id: Optional[Union[str, None]] = None, snippet: Optional[bool] = False):
+        if playlist_id is None:
+            playlist_id = self.playlist_id
+        
+        part = "id,snippet,contentDetails" if snippet else "id,contentDetails"
+        responses = []
+        playlist_api_queries = {"part": part, "playlistId": playlist_id, "maxResults": 50}
+        request = self._youtube.playlistItems().list(**playlist_api_queries)
+        response = request.execute()
+        self.cost += 1
+        responses.append(response)
+        next_page_token = response.get("nextPageToken")
+        
+        while next_page_token:
+            request = self._youtube.playlistItems().list(**playlist_api_queries, pageToken=next_page_token)
+            response = request.execute()
+            self.cost += 1
+            responses.append(response)
+            next_page_token = response.get("nextPageToken")
+        
+        return responses
+
+    def _playlist_item_ids(self) -> Dict[str, List[str]]:
+        video_ids_dict = {}
+        
+        for response in self.responses:
+            for item in response["items"]:
+                video_id = item["contentDetails"]["videoId"]
+                if video_id in video_ids_dict:
+                    video_ids_dict[video_id] = video_ids_dict[video_id].append(item["id"])
+                else:
+                    video_ids_dict[video_id] = [item["id"]]
+            
+        return video_ids_dict
+    
+    def refresh(self) -> None:
+        """resfresh playlist responses
+        
+        cost = 1 per page for 50 max results
+        """
+        self.responses = self._pl_responses(snippet=self._snippet)
+        self._playlist_items = self._playlist_item_ids()
+        self.video_ids = list(self._playlist_items.keys())
+            
+    def update(self, title: str, desc: Optional[Union[str, None]] = None, status: Optional[Union[str, None]] = None) -> dict:
+        """update playlist title, description and privacy status
+
+        Args:
+            title (str): title for playlist
+            desc (Optional[str], optional): description for playlist. Defaults to "".
+            status (Optional[str], optional): privacy status for playlist. Defaults to "private".
+
+        Returns:
+            dict: response
+        """
+        part = "id,snippet"
+        request_body = {
+            "id": self.playlist_id,
+            "kind": "youtube#playlist",
+            "snippet": {
+                "title": title,
+            }
+        }
+        
+        if desc is not None:
+            request_body["snippet"]["description"] = desc
+
+        if status is not None:
+            request_body["status"] = {
+                "privacyStatus": status
+            }
+            part += ",status"
+            
+        request = self._youtube.playlists().insert(part=part, body=request_body)
+        response = request.execute()
+        self.cost += 50
+        return response
+           
+    def delete(self) -> None:
+        """delete the intialized playlist from youtube forever
+        
+        cost = 50
+        """
+        request = self._youtube.playlists().delete(id=self.playlist_id)
+        request.execute()
+        self.cost += 50
+                                          
+    def add_video(self, video_id: str) -> Union[dict, None]:
+        """add videos to intialized playlist by using video id only if not present
         
         cost = 50
 
@@ -26,196 +149,96 @@ class Playlists:
             video_id (str): video id
             
         Returns:
-            dict: response
+            Union[dict, None]: returns response if video id is added to playlist else None
         """
+        if video_id in self.video_ids:
+            return None
+        
         request_body = {
-            'snippet': {
-                'playlistId': self.playlist_id,
-                'resourceId': {
-                    'kind': 'youtube#video',
-                    'videoId': video_id
+            "snippet": {
+                "playlistId": self.playlist_id,
+                "resourceId": {
+                    "kind": "youtube#video",
+                    "videoId": video_id
                 }
             }
         }
-
-        request = self.youtube.playlistItems().insert(part='snippet', body=request_body)
-        return request.execute()
-    
-    def remove_video(self, playlist_item_id: str) -> dict:
-        """remove video of playlist using its id
         
-        cost = 50
-        
-        Args:
-            playlist_item_id (str): id
+        request = self._youtube.playlistItems().insert(part="snippet", body=request_body)
+        response = request.execute()
+        self.cost += 50
+        self.video_ids.append(video_id)
+        return response
 
-        Returns:
-            dict: response
-        """
-        request = self.youtube.playlistItems().delete(id=playlist_item_id)
-        return request.execute()
-
-    def copy_from(self, playlist_id: str) -> int:
+    def copy_from(self, playlist_id: str) -> None:
         """copy videos from a given playlist to intialized playlist
-        
-        cost = 1 per page for 50 max results + 50 per insert of video
-        
+
         Args:
             playlist_id (str): playlist id
-            
-        Returns:
-            int: total cost
         """
-        
-        def _process_response(response, copy_videos_ids):
-            for item in response["items"]:
-                video_id = item["contentDetails"]["videoId"]
-                if video_id not in copy_videos_ids:
-                    copy_videos_ids.append(video_id)
-
-        cost = 0
         copy_videos_ids = []
-        playlist_api_queries = {"part": "contentDetails", "playlistId": playlist_id, "maxResults": 50}
-        request = self.youtube.playlistItems().list(**playlist_api_queries)
-        response = request.execute()
-        cost += 1
-        _process_response(response, copy_videos_ids)
-        next_page_token = response.get('nextPageToken')
         
-        while next_page_token:
-            request = self.youtube.playlistItems().list(**playlist_api_queries, pageToken=next_page_token)
-            response = request.execute()
-            cost += 1
-            _process_response(response, copy_videos_ids)
-            next_page_token = response.get('nextPageToken')
-        
-        copy_videos_ids = tqdm(copy_videos_ids) if self.progress_bars else copy_videos_ids
+        for item in self._pl_responses(playlist_id)["items"]:
+            video_id = item["contentDetails"]["videoId"]
+            if video_id not in copy_videos_ids and video_id not in self.video_ids:
+                copy_videos_ids.append(video_id)
+
+        if self._progress_bars:
+            copy_videos_ids = tqdm(copy_videos_ids, desc=_Messages.add_msg)
         
         for video_id in copy_videos_ids:
             self.add_video(video_id)
-            cost += 50
             
-        return cost
-
-    def remove_duplicate(self) -> int:
-        """removes duplicate videos from intialized playlist
+    def remove_video(self, video_id: str, recursive: Optional[bool] = True) -> Union[dict, None]:
+        """remove video from intialized playlist by using video id only if it's present
         
-        cost = 1 per page for 50 max results + 50 per removal of video
-        
-        Returns:
-            int: total cost
-        """
-        
-        def _process_response(response, unique_video_ids, delete_playlist_ids):
-            for item in response["items"]:
-                video_id = item["contentDetails"]["videoId"]
-                
-                if video_id not in unique_video_ids:
-                    unique_video_ids.append(video_id)
-                else:
-                    delete_playlist_ids.append(item["id"])
-        
-        cost = 0
-        delete_playlist_ids = []
-        unique_video_ids = []
-        playlist_api_queries = {"part": "id,contentDetails", "playlistId": self.playlist_id, "maxResults": 50}
-        
-        request = self.youtube.playlistItems().list(**playlist_api_queries)
-        response = request.execute()
-        cost += 1
-        _process_response(response, unique_video_ids, delete_playlist_ids)
-        next_page_token = response.get('nextPageToken')
-
-        while next_page_token:
-            request = self.youtube.playlistItems().list(**playlist_api_queries, pageToken=next_page_token)
-            response = request.execute()
-            cost += 1
-            _process_response(response, unique_video_ids, delete_playlist_ids)
-            next_page_token = response.get('nextPageToken')
-        
-        delete_playlist_ids = tqdm(delete_playlist_ids) if self.progress_bars else delete_playlist_ids
-        
-        for playlist_item_id in delete_playlist_ids:
-            self.remove_video(playlist_item_id)  
-            cost += 50
-            
-        return cost                  
-
-    def clear(self, skip_ids: List[str] = []) -> int:
-        """clear/removes all videos from intialized playlist
-        
-        cost = 1 per page for 50 max results + 50 per removal of video
-
-        Args:
-            skip_ids (List[str], optional): list video ids to skip. Defaults to [].
-                    
-        Returns:
-            int: total cost
-        """
-                
-        def _process_response(response, delete_playlist_ids, skip_ids):
-            for item in response["items"]:
-                video_id = item["contentDetails"]["videoId"]
-                if video_id not in skip_ids:
-                    delete_playlist_ids.append(item["id"])
-                    
-        cost = 0
-        delete_playlist_ids = []
-        playlist_api_queries = {"part": "id,contentDetails", "playlistId": self.playlist_id, "maxResults": 50}
-        
-        request = self.youtube.playlistItems().list(**playlist_api_queries)
-        response = request.execute()
-        cost += 1
-        _process_response(response, delete_playlist_ids, skip_ids)
-        next_page_token = response.get('nextPageToken')
-        
-        while next_page_token:
-            request = self.youtube.playlistItems().list(**playlist_api_queries, pageToken=next_page_token)
-            response = request.execute()
-            cost += 1
-            _process_response(response, delete_playlist_ids, skip_ids)
-            next_page_token = response.get('nextPageToken')
-        
-        delete_playlist_ids = tqdm(delete_playlist_ids) if self.progress_bars else delete_playlist_ids
-        
-        for playlist_item_id in delete_playlist_ids:
-            self.remove_video(playlist_item_id)
-            cost += 50
-            
-        return cost
-
-    def video_ids(self, remove_comman: Optional[bool] = False) -> Tuple[List[str], int]:
-        """this method returns list of video ids in intialized playlist 
-        
-        cost = 1 per page for 50 max results
+        cost = 50 per removal of video
         
         Args:
-            remove_comman (Optional[bool], optional): remove comman video ids. Defaults to False.
+            video_id (str): video id to remove
+            recursive (Optional[bool], optional): remove all videos with same video id. Defaults to True.
 
         Returns:
-            Tuple[List[str], int]: videos ids list, cost
+            Union[dict, None]: returns last response if removed else None
         """
-        
-        def _process_response(response, videos_ids, remove_comman):
-            for item in response["items"]:
-                video_id = item["contentDetails"]["videoId"]
-                if (remove_comman and video_id not in videos_ids) or not remove_comman:
-                    videos_ids.append(video_id)
+        if video_id not in self.video_ids:
+            return None
 
-        cost = 0
-        videos_ids = []
-        playlist_api_queries = {"part": "contentDetails", "playlistId": self.playlist_id, "maxResults": 50}
-        request = self.youtube.playlistItems().list(**playlist_api_queries)
-        response = request.execute()
-        cost += 1
-        _process_response(response, videos_ids, remove_comman)
-        next_page_token = response.get('nextPageToken')
-        
-        while next_page_token:
-            request = self.youtube.playlistItems().list(**playlist_api_queries, pageToken=next_page_token)
+        for playlist_item_id in self._playlist_items[video_id]:
+            request = self._youtube.playlistItems().delete(id=playlist_item_id)
             response = request.execute()
-            cost += 1
-            _process_response(response, videos_ids, remove_comman)
-            next_page_token = response.get('nextPageToken')
+            self.cost += 50
+            self.video_ids.remove(video_id)
+            if not recursive:
+                break
+
+        return response
+
+    def clear(self, skip_ids: Optional[List[str]] = []) -> None:
+        """clear/remove all videos from intialized playlist
+
+        Args:
+            skip_ids (Optional[List[str]], optional): list video ids to skip. Defaults to [].
+        """
+        remove_video_ids = [video_id for video_id in self.video_ids if video_id not in skip_ids]
+
+        if self._progress_bars:
+            remove_video_ids = tqdm(remove_video_ids, desc=_Messages.rm_msg)
         
-        return videos_ids, cost
+        for video_id in remove_video_ids:
+            self.remove_video(video_id)
+
+    def remove_duplicate(self) -> None:
+        """remove duplicate videos from intialized playlist
+        """
+        remove_video_ids = [
+            video_id
+            for video_id, playlist_item_id in self._playlist_items.items()
+            if len(playlist_item_id) > 1
+        ]
+
+        if self._progress_bars:
+            remove_video_ids = tqdm(remove_video_ids, desc=_Messages.rm_msg)
+
+        for video_id in remove_video_ids:
+            self.remove_video(video_id)            

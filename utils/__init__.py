@@ -1,16 +1,21 @@
 import json
+from typing import Optional
 from .millify import millify, prettify
 from .time_soup import *
 
-def dump_json(filename: str, obj: dict) -> None:
+def dump_json(filename: str, obj: dict, pretty: Optional[bool] = False) -> None:
     """dumps a json file
 
     Args:
         filename (str): path of json file
         obj (dict): dict object to stored
+        pretty (Optional[bool], optional): prettify json. Defaults to False.
     """
     with open(filename, "w") as f:
-        json.dump(obj, f, indent=4)
+        if not pretty:
+            json.dump(obj, f)
+        else:
+            json.dump(obj, f, indent=4)
         
 def load_json(filename: str) -> dict:
     """loads a json file

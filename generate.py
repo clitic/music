@@ -6,14 +6,13 @@ from tqdm import tqdm
 from youtube_v3_api import YoutubeService, get_regions
 
 
-markdown_header = f"""---
+markdown_header = """---
 hide:
 - navigation
 ---
 
-[:material-download: JSON](data.json) &nbsp;&nbsp;
-[:material-youtube: Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ) &nbsp;&nbsp;
-{utils.timestamp()}
+[:material-download: JSON](data.json)
+[:material-youtube: Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)
 
 # Global Music Trends :material-music:\n
 """

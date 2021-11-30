@@ -1,11 +1,11 @@
 # Global Music Trends 🎵
 
-Global Music Trends is a youtube playlist which lists outs the trending music videos from youtube across its all regions.
+Global Music Trends is a youtube playlist which lists outs the trending music videos from youtube, across its all regions.
 
-- [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)
-- [Website](https://360modder.github.io/global-music-trends/)
+- <a href="https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ" target="_blank">Stream Youtube Playlist</a>
+- <a href="https://360modder.github.io/global-music-trends/" target="_blank">Website</a>
 
-The only criteria to add videos to playlist is that, the music video should trend in at least 2 countries.
+The only criteria to add videos to playlist is that, the music video should trend in at least 2 regions.
 
 ## Usage
 
@@ -15,7 +15,7 @@ First install all dependecies by running the below command.
 pip install -r requirements.txt
 ```
 
-Now generate a youtube v3 api key from [cloud project](https://console.cloud.google.com/). Set the api key as envoirnment variable if you want. To generate playlist data just run the below command.
+Now enable and generate a [youtube v3](https://console.cloud.google.com/apis/library/youtube.googleapis.com) api key from [cloud project](https://console.cloud.google.com/). Set the api key as envoirnment variable if you want. To generate playlist data just run the below command.
 
 ```bash
 python generate.py $YT_API_KEY
@@ -35,10 +35,16 @@ Visit [localhost](http://127.0.0.1:8000/) to view site.
 
 ## Creating A Youtube Playlist
 
-To create a youtube playlist you need to create OAuth client in your [cloud project](https://console.cloud.google.com/). Add one redirect urls as http://127.0.0.1:8080 . After creating OAuth client download clients_secrets.json file and save it in safe/clients_secrets.json . Open update.py and change its `PLAYLIST_ID` to yours playlist id, and run this command.
+To create a youtube playlist you need to create OAuth client in your [cloud project](https://console.cloud.google.com/). Add one redirect urls as http://localhost:8080 . After creating OAuth client download client_secrets.json file and save it in safe/client_secrets.json . Finally run this command.
 
 ```bash
-python update.py
+python update.py -p <playlist id>
+```
+
+Or
+
+```bash
+python update.py -h
 ```
 
 ## Credits

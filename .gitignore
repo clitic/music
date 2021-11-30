@@ -129,5 +129,6 @@ dmypy.json
 .pyre/
 
 # my files
-safe
+safe/*
 safe/client_secrets.json
+a.py

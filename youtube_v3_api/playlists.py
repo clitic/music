@@ -1,5 +1,8 @@
+import pickle
 from typing import Any, Dict, List, Optional, Tuple, Union
 from tqdm import tqdm
+from .create import Create
+
 
 
 class _Messages:
@@ -40,6 +43,62 @@ class Playlists:
         self._playlist_items = self._playlist_item_ids()
         self.video_ids = list(self._playlist_items.keys())
         
+    @classmethod
+    def load(cls, filepath: str, youtube: Any, playlist_id: Optional[Union[str, None]] = None,
+             remove: Optional[bool] = False, **kwargs):
+        """Construct Playlist class from saved pickled file
+        
+        This constructor creates a new playlist if playlist_id is not provided. 
+        If you use playlist_id and want a complete sync with pickled file, then set remove=True.
+        
+        Args:
+            filepath (str): pickled file path
+            youtube (Any): a resource object with methods for interacting with the service.
+            playlist_id (Optional[Union[str, None]], optional): playlist id. Defaults to None.
+            remove (Optional[bool], optional): remove uncessary videos from playlist. Defaults to False.
+
+        Returns:
+            Playlist: instance of Playlists class
+        """
+        
+        progress_bars = bool("progress_bars" in kwargs.keys() and kwargs["progress_bars"])
+
+        # loading pickled instance of ResurrectPlaylist class
+        loaded_pl = ResurrectPlaylist.load(filepath)
+
+        if playlist_id is None:
+            # create a new playlist
+            create_item = Create(youtube)
+            new_pl_id = create_item.playlist(loaded_pl.title, loaded_pl.desc, loaded_pl.status)
+            # load newly created playlist
+            new_pl = cls(new_pl_id, youtube, **kwargs)
+            new_pl.cost += create_item.cost
+        else:
+            new_pl = cls(playlist_id, youtube, **kwargs) # load the given playlist
+            new_pl.update(loaded_pl.title, loaded_pl.desc, loaded_pl.status)
+
+        # adding videos
+        video_ids = loaded_pl.video_ids
+        if progress_bars:
+            video_ids = tqdm(video_ids, desc=_Messages.add_msg)
+
+        for video_id in video_ids:
+            new_pl.add_video(video_id)
+
+        # removing videos
+        if playlist_id is not None and remove:
+
+            video_ids = new_pl.video_ids
+            if progress_bars:
+                video_ids = tqdm(video_ids, desc=_Messages.add_msg)
+                
+            for video_id in video_ids:
+                if video_id not in loaded_pl.video_ids:
+                    new_pl.remove_video(video_id)
+
+        new_pl.refresh()
+        return new_pl
+            
     def __len__(self) -> int:
         return self.responses[0]["pageInfo"]["totalResults"]
 
@@ -99,7 +158,9 @@ class Playlists:
             
     def update(self, title: str, desc: Optional[Union[str, None]] = None, status: Optional[Union[str, None]] = None) -> dict:
         """update playlist title, description and privacy status
-
+        
+        cost = 50
+        
         Args:
             title (str): title for playlist
             desc (Optional[str], optional): description for playlist. Defaults to "".
@@ -247,4 +308,54 @@ class Playlists:
             remove_video_ids = tqdm(remove_video_ids, desc=_Messages.rm_msg)
 
         for video_id in remove_video_ids:
-            self.remove_video(video_id)            
+            self.remove_video(video_id)
+    
+    def save(self, filepath: str):
+        """save the intialized playlist to a pickle file
+
+        Args:
+            filepath (str): pickle file path
+            
+        Examples:
+            >>> pl.save("my_music_playlist.pkl")
+            >>> from youtube_v3_api import ResurrectPlaylist
+            >>> pl_data = ResurrectPlaylist.load("my_music_playlist.pkl")
+            >>> pl_data.video_ids
+            ['h329290', 'hj2832']
+        """
+        pl = ResurrectPlaylist(self.title, self.desc, self.status, self.video_ids)
+        pl.save(filepath)
+
+class ResurrectPlaylist:
+    """ResurrectPlaylist class saves and loads its instance in and from a pickled file
+    """
+    
+    def __init__(self, title: str, desc: str, status: str, video_ids: List[str]) -> None:
+        """ResurrectPlaylist class saves and loads its instance in a pickled file
+        """
+        self.title, self.desc, self.status = title, desc, status
+        self.video_ids = video_ids
+    
+    @classmethod
+    def load(cls, filepath: str):
+        """Construct ResurrectPlaylist class from a pickled file
+
+        Args:
+            filepath (str): pickled file path
+
+        Returns:
+            ResurrectPlaylist: instance of ResurrectPlaylist
+        """
+        with open(filepath, "rb") as f:
+            pl: ResurrectPlaylist = pickle.load(f)
+        
+        return cls(pl.title, pl.desc, pl.status, pl.video_ids)
+
+    def save(self, filepath: str):
+        """save instance of class in a pickle file
+
+        Args:
+            filepath (str): pickle file path
+        """
+        with open(filepath, "wb") as f:
+            pickle.dump(self, f)

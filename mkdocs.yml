@@ -1,4 +1,6 @@
-site_name: Global Music Trends
+site_name: Current Music Trends
+repo_url: https://github.com/360modder/current-music-trends
+repo_name: 360modder/current-music-trends
 
 theme:
   name: material
@@ -22,4 +24,5 @@ markdown_extensions:
       emoji_generator: !!python/name:materialx.emoji.to_svg
 
 nav:
-  - index.md
+  - Home: index.md
+  - Points Meter: points-meter.md

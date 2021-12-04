@@ -9,11 +9,11 @@ class _Messages:
     rm_msg = "removing videos"
     
 class Playlists:
-    """Playlists class to interact with youtube playlists
+    """Playlists class interacts with youtube playlists
     """
     
     def __init__(self, playlist_id: str, youtube: Any, snippet: Optional[bool] = False, progress_bars: Optional[bool] = False) -> None:
-        """Playlists class to interact with youtube playlists
+        """Playlists class interacts with youtube playlists
 
         cost = 1 for playlist information + 1 per page for 50 max results
 
@@ -129,6 +129,12 @@ class Playlists:
         request = self._youtube.playlists().insert(part=part, body=request_body)
         response = request.execute()
         self.cost += 50
+        
+        title = response["items"][0]["snippet"]["title"]
+        desc = response["items"][0]["snippet"]["description"]
+        status = response["items"][0]["status"]["privacyStatus"]
+        self.title, self.desc, self.status = title, desc, status
+        
         return response
            
     def delete(self) -> None:

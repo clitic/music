@@ -1,9 +1,9 @@
-# Global Music Trends 🎵
+# Current Music Trends 🎵
 
-Global Music Trends is a youtube playlist which lists outs the trending music videos from youtube, across its all regions.
+Current Music Trends is a youtube playlist which lists outs the trending music videos from youtube, across its all regions.
 
-- <a href="https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ" target="_blank">Stream Youtube Playlist</a>
-- <a href="https://360modder.github.io/global-music-trends/" target="_blank">Website</a>
+- [Stream Youtube Playlist]("https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ")
+- [Website]("https://360modder.github.io/current-music-trends")
 
 The only criteria to add videos to playlist is that, the music video should trend in at least 2 regions.
 

@@ -19,10 +19,12 @@ theme:
         name: Switch to light mode
 
 markdown_extensions:
+  - attr_list
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
 
 nav:
   - Home: index.md
-  - Points Meter: points-meter.md
+  - Region Score: region-score.md
+  - Playlist: playlist.md

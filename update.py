@@ -13,7 +13,7 @@ def video_ids_from_json(json_file: str, fetch: bool) -> List[str]:
         return [video_id for _, _, video_id in data]
     
     if fetch:
-        data = requests.get("https://360modder.github.io/global-music-trends/data.json").json()
+        data = requests.get("https://360modder.github.io/current-music-trends/data.json").json()
     else:
         data = utils.load_json(json_file)
     

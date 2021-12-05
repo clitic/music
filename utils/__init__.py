@@ -1,7 +1,9 @@
 import json
-from typing import Optional
+import pickle
+from typing import Any, Optional
 from .millify import millify, prettify
 from .time_soup import *
+
 
 def dump_json(filename: str, obj: dict, pretty: Optional[bool] = False) -> None:
     """dumps a json file
@@ -28,3 +30,25 @@ def load_json(filename: str) -> dict:
     """
     with open(filename) as f:
         return json.load(f)
+
+def dump_pickle(filename: str, obj: Any) -> None:
+    """dump a object pickle
+
+    Args:
+        filename (str): path for pickle file
+        obj (Any): object to serialize
+    """
+    with open(filename, "wb") as f:
+        pickle.dump(obj, f)
+
+def load_pickle(filename: str) -> Any:
+    """load a pickle file
+
+    Args:
+        filename (str): path of pickled file
+
+    Returns:
+        Any: loaded object
+    """
+    with open(filename, "rb") as f:
+        return pickle.load(f)

@@ -27,4 +27,4 @@ def time_left_for_pacific_midnight():
     return time_left, clock_time
 
 def timestamp():
-    return datetime.datetime.now().strftime("%d/%m/%Y @ %I:%M %p")
+    return datetime.datetime.utcnow().strftime("%d/%m/%Y %I:%M %p UTC")

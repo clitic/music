@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 # my files
-safe/*
 safe/client_secrets.json
+safe/*.pkl
+safe/*.pickle
 a.py

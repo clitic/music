@@ -59,8 +59,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("update", description="updates youtube playlist")
     parser.add_argument("-p", "--playlist", dest="playlist", default="PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ",
                         help="youtube playlist id (default: PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)")
-    parser.add_argument("-i", "--input", dest="input", default="safe/data.json",
-                        help="path of data.json file (default: safe/data.json)")
+    parser.add_argument("-i", "--input", dest="input", default="docs/data.json",
+                        help="path of data.json file (default: docs/data.json)")
     parser.add_argument("-f", "--fetch", dest="fetch", default=False, action="store_true",
                         help="fetch data.json from github instead of local file (default: false)")
     parser.add_argument("--relogin", dest="relogin", default=False, action="store_true",

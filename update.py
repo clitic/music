@@ -1,4 +1,5 @@
 import argparse
+import traceback
 import utils
 import requests
 from typing import List
@@ -13,7 +14,7 @@ def video_ids_from_json(json_file: str, fetch: bool) -> List[str]:
         return [video_id for _, _, video_id in data]
     
     if fetch:
-        data = requests.get("https://360modder.github.io/current-music-trends/data.json").json()
+        data = requests.get("https://raw.githubusercontent.com/360modder/current-music-trends/gh-pages/data.json").json()
     else:
         data = utils.load_json(json_file)
     
@@ -39,8 +40,8 @@ def main(args: argparse.Namespace):
                 pl.add_video(video_id)
             else:
                 videos_not_added += 1
-        except Exception as e:
-            # TODO log e
+        except:
+            traceback.print_exc()
             videos_not_added += 1
             add_video = False
 
@@ -69,5 +70,5 @@ if __name__ == "__main__":
                         help="skip clearing youtube playlist (default: false)")
     args = parser.parse_args()
     
-    print("sometimes some videos are not added to playlist, try re-running the script")
+    print("sometimes some videos are not removed or added to playlist, try re-running the script")
     main(args)

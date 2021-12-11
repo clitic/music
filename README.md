@@ -3,7 +3,7 @@
 Current Music Trends is a youtube playlist which lists outs the trending music videos from youtube, across its all regions.
 
 - [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)
-- [Website](https://360modder.github.io/current-music-trends)
+- [Website](https://360modder.github.io/current-music-trends/home)
 
 The only criteria to add videos to playlist is that, the music video should trend in at least 2 regions.
 
@@ -24,11 +24,8 @@ python generate.py $YT_API_KEY
 Optionally you can serve site too.
 
 ```bash
-pip install mkdocs-material
-```
-
-```bash
-mkdocs serve
+$ pip install mkdocs-material
+$ mkdocs serve
 ```
 
 Visit [localhost](http://127.0.0.1:8000/) to view site.

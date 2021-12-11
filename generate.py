@@ -2,6 +2,7 @@ import argparse
 import utils
 from collections import Counter
 from typing import Any, List, Optional, Tuple, Union
+import requests
 from tqdm import tqdm
 from youtube_v3_api import YoutubeService, get_regions
 
@@ -74,6 +75,7 @@ def write_docs(mv_ids: List[str], id_counter: Counter, mv_ids_level2: list):
     home_md = utils.MarkdownFile.from_file("docs/templates/home.md")
     home_md["top_10_by_region"] = ""
     home_md["top_10_by_views"] = ""
+    home_md["newly_added"] = ""
     home_md["timestamp"] = utils.timestamp()
     
     for i, (video_id, count) in enumerate(id_counter.most_common(10), start=1):
@@ -81,6 +83,13 @@ def write_docs(mv_ids: List[str], id_counter: Counter, mv_ids_level2: list):
 
     for i, (views, title, video_id) in enumerate(mv_ids_level2[:10], start=1):
         home_md["top_10_by_views"] += _playlist(i, title, video_id, views)
+    
+    old_mv_ids = requests.get("https://raw.githubusercontent.com/360modder/current-music-trends/gh-pages/data.json").json()
+    old_video_ids = [video_id for _, _, video_id in old_mv_ids]
+    
+    for i, (video_id, count) in enumerate(id_counter.most_common(len(mv_ids)), start=1):
+        if count >= 2 and video_id not in old_video_ids:
+            home_md["newly_added"] += _region_score(i, video_id, count)
     
     home_md.save("docs/home.md")
 

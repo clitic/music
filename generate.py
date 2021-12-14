@@ -87,9 +87,9 @@ def write_docs(mv_ids: List[str], id_counter: Counter, mv_ids_level2: list):
     old_mv_ids = requests.get("https://raw.githubusercontent.com/360modder/current-music-trends/gh-pages/data.json").json()
     old_video_ids = [video_id for _, _, video_id in old_mv_ids]
     
-    for i, (video_id, count) in enumerate(id_counter.most_common(len(mv_ids)), start=1):
-        if count >= 2 and video_id not in old_video_ids:
-            home_md["newly_added"] += _region_score(i, video_id, count)
+    for i, (views, title, video_id) in enumerate(mv_ids_level2, start=1):
+        if video_id not in old_video_ids:
+            home_md["newly_added"] += _playlist(i, title, video_id, views)
     
     home_md.save("docs/home.md")
 

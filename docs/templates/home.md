@@ -3,7 +3,7 @@
 [:material-download: JSON](/current-music-trends/data.json){ .md-button .md-button--primary }
 [:material-youtube: Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ){ .md-button .md-button--primary }
 
-<!-- $timestamp -->
+Last Updated <!-- $timestamp -->
 
 ## Top 10 (by region)
 
@@ -17,6 +17,6 @@
 
 [More](/current-music-trends/playlist)
 
-## What's New Today (by region)
+## What's New Today (by views)
 
 <!-- $newly_added -->

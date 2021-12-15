@@ -19,7 +19,9 @@ class Playlists:
         """Playlists class interacts with youtube playlists
 
         cost = 1 for playlist information + 1 per page for 50 max results
-
+        
+        min cost = 2, max cost = 101
+        
         Args:
             playlist_id (str): playlist id
             youtube (Any): a resource object with methods for interacting with the service.
@@ -169,7 +171,6 @@ class Playlists:
         Returns:
             dict: response
         """
-        part = "id,snippet"
         request_body = {
             "id": self.playlist_id,
             "kind": "youtube#playlist",
@@ -185,15 +186,14 @@ class Playlists:
             request_body["status"] = {
                 "privacyStatus": status
             }
-            part += ",status"
             
-        request = self._youtube.playlists().insert(part=part, body=request_body)
+        request = self._youtube.playlists().update(part="id,snippet,status", body=request_body)
         response = request.execute()
         self.cost += 50
         
-        title = response["items"][0]["snippet"]["title"]
-        desc = response["items"][0]["snippet"]["description"]
-        status = response["items"][0]["status"]["privacyStatus"]
+        title = response["snippet"]["title"]
+        desc = response["snippet"]["description"]
+        status = response["status"]["privacyStatus"]
         self.title, self.desc, self.status = title, desc, status
         
         return response

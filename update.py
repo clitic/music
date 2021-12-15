@@ -7,6 +7,16 @@ from tqdm import tqdm
 from youtube_v3_api import YoutubeService, Playlists
 
 
+pl_desc = f"""Last Updated {utils.timestamp()}
+
+A playlist which lists outs the trending music videos from youtube, across its all regions. This playlist updates occasionally in a week.
+
+Website: https://360modder.github.io/current-music-trends/home
+
+Source Code: https://github.com/360modder/current-music-trends
+"""
+
+
 def video_ids_from_json(json_file: str, fetch: bool) -> List[str]:
     """get video ids to be added from json file"""
     
@@ -27,7 +37,8 @@ def main(args: argparse.Namespace):
         token_file="safe/token_youtube_v3.pkl", relogin=args.relogin
     )
     pl = Playlists(args.playlist, youtube, progress_bars=True)
-
+    pl.update(pl.title, pl_desc)
+    
     if not args.no_clear:
         pl.clear(skip_ids=list(set(pl.video_ids).intersection(add_video_ids)))
 

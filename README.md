@@ -1,9 +1,9 @@
 # Current Music Trends 🎵
 
-Current Music Trends is a youtube playlist which lists outs the trending music videos from youtube, across its all regions.
+Current Music Trends is custom youtube metrics for trending music videos. There is also a youtube playlist which lists outs the trending music videos from youtube, across its all regions.
 
-- [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)
 - [Website](https://360modder.github.io/current-music-trends/home)
+- [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)
 
 The only criteria to add videos to playlist is that, the music video should trend in at least 2 regions.
 
@@ -28,11 +28,11 @@ $ pip install mkdocs-material
 $ mkdocs serve
 ```
 
-Visit [localhost](http://127.0.0.1:8000/) to view site.
+Visit [localhost](http://127.0.0.1:8000/ to view site.
 
 ## Creating A Youtube Playlist
 
-To create a youtube playlist you need to create OAuth client in your [cloud project](https://console.cloud.google.com/). Add one redirect urls as http://localhost:8080 . After creating OAuth client download client_secrets.json file and save it in safe/client_secrets.json . Finally run this command.
+To create a youtube playlist you need to create [OAuth](https://developers.google.com/youtube/v3/guides/authentication) client in your [cloud project](https://console.cloud.google.com). Also setup a [installed app flow](https://developers.google.com/youtube/v3/guides/auth/installed-apps) and add one redirect urls as http://localhost:8080 . After creating OAuth client download client_secrets.json file and save it in safe/client_secrets.json . Finally run this command.
 
 ```bash
 python update.py -p <playlist id>

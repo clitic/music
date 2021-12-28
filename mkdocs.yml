@@ -33,5 +33,9 @@ extra_javascript:
 
 nav:
   - Home: home.md
+  - Time To Views Ratio: time-to-views-ratio.md
   - Region Score: region-score.md
   - Playlist: playlist.md
+  - Likes: likes.md
+  - Comments: comments.md
+  - Newly Added: newly-added.md

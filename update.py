@@ -20,15 +20,9 @@ Source Code: https://github.com/360modder/current-music-trends
 def video_ids_from_json(json_file: str, fetch: bool) -> List[str]:
     """get video ids to be added from json file"""
     
-    def _parse_dict(data: list) -> List[str]:
-        return [video_id for _, _, video_id in data]
-    
-    if fetch:
-        data = requests.get("https://raw.githubusercontent.com/360modder/current-music-trends/gh-pages/data.json").json()
-    else:
-        data = utils.load_json(json_file)
-    
-    return _parse_dict(data)
+    link = "https://raw.githubusercontent.com/360modder/current-music-trends/gh-pages/data.json"
+    data = requests.get(link).json() if fetch else utils.load_json(json_file)
+    return [video_id for _, _, video_id in data]
 
 def main(args: argparse.Namespace):
     add_video_ids = video_ids_from_json(args.input, args.fetch)

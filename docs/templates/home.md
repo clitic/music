@@ -3,7 +3,13 @@
 [:material-download: JSON](/current-music-trends/data.json){ .md-button .md-button--primary }
 [:material-youtube: Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ){ .md-button .md-button--primary }
 
-Last Updated <!-- $timestamp -->
+Last Updated <!-- $timestamp --> (daily at utc midnight)
+
+## Top 10 (by ratio) [Core Metrics] :chart_with_upwards_trend:
+
+<!-- $top_10_by_ratio -->
+
+[More](/current-music-trends/time-to-views-ratio)
 
 ## Top 10 (by region)
 
@@ -17,6 +23,14 @@ Last Updated <!-- $timestamp -->
 
 [More](/current-music-trends/playlist)
 
-## What's New Today (by views)
+## Top 10 (by likes)
 
-<!-- $newly_added -->
+<!-- $top_10_by_likes -->
+
+[More](/current-music-trends/likes)
+
+## Top 10 (by comments)
+
+<!-- $top_10_by_comments -->
+
+[More](/current-music-trends/comments)

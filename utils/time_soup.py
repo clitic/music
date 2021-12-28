@@ -28,3 +28,6 @@ def time_left_for_pacific_midnight():
 
 def timestamp():
     return datetime.datetime.utcnow().strftime("%d/%m/%Y %I:%M %p UTC")
+
+def utc_seconds():
+    return datetime_to_seconds(datetime.datetime.utcnow())

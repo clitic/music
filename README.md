@@ -28,7 +28,7 @@ $ pip install mkdocs-material
 $ mkdocs serve
 ```
 
-Visit [localhost](http://127.0.0.1:8000/ to view site.
+Visit [localhost](http://127.0.0.1:8000) to view site.
 
 ## Creating A Youtube Playlist
 

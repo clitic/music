@@ -11,16 +11,16 @@ pl_desc = f"""Last Updated {utils.timestamp()}
 
 A playlist which lists outs the trending music videos from youtube, across its all regions. This playlist updates occasionally in a week.
 
-Website: https://360modder.github.io/current-music-trends/home
+Website: https://clitic.github.io/current-music-trends/home
 
-Source Code: https://github.com/360modder/current-music-trends
+Source Code: https://github.com/clitic/current-music-trends
 """
 
 
 def video_ids_from_json(json_file: str, fetch: bool) -> List[str]:
     """get video ids to be added from json file"""
     
-    link = "https://raw.githubusercontent.com/360modder/current-music-trends/gh-pages/data.json"
+    link = "https://raw.githubusercontent.com/clitic/current-music-trends/gh-pages/data.json"
     data = requests.get(link).json() if fetch else utils.load_json(json_file)
     return [video_id for _, _, video_id in data]
 
@@ -63,8 +63,8 @@ def main(args: argparse.Namespace):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("update", description="updates youtube playlist")
-    parser.add_argument("-p", "--playlist", dest="playlist", default="PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ",
-                        help="youtube playlist id (default: PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)")
+    parser.add_argument("-p", "--playlist", dest="playlist", default="PLv5KLCzERve6UI32k8kvAcUY077i3VWE6",
+                        help="youtube playlist id (default: PLv5KLCzERve6UI32k8kvAcUY077i3VWE6)")
     parser.add_argument("-i", "--input", dest="input", default="docs/data.json",
                         help="path of data.json file (default: docs/data.json)")
     parser.add_argument("-f", "--fetch", dest="fetch", default=False, action="store_true",

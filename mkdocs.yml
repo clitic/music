@@ -1,6 +1,6 @@
 site_name: Current Music Trends
-repo_url: https://github.com/360modder/current-music-trends
-repo_name: 360modder/current-music-trends
+repo_url: https://github.com/clitic/current-music-trends
+repo_name: clitic/current-music-trends
 
 theme:
   name: material

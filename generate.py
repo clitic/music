@@ -83,7 +83,7 @@ def write_docs(mv_ids: List[str], id_counter: Counter, mv_ids_level2: list, vide
         return f"{i}. [{mv_ids[video_id][1]}](https://youtu.be/{video_id}) " \
             f"| {utils.millify(comments, precision=1)} comments\n"
                      
-    old_mv_ids = requests.get("https://raw.githubusercontent.com/360modder/current-music-trends/gh-pages/data.json").json()
+    old_mv_ids = requests.get("https://raw.githubusercontent.com/clitic/current-music-trends/gh-pages/data.json").json()
     
     # docs/home.md
     home_md = utils.MarkdownFile.from_file("docs/templates/home.md")

@@ -3,7 +3,7 @@
 Current Music Trends is custom youtube metrics for trending music videos. There is also a youtube playlist which lists outs the trending music videos from youtube, across its all regions.
 
 - [Website](https://clitic.github.io/current-music-trends/home)
-- [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ)
+- [Stream Youtube Playlist](https://www.youtube.com/playlist?list=PLv5KLCzERve6UI32k8kvAcUY077i3VWE6)
 
 The only criteria to add videos to playlist is that, the music video should trend in at least 2 regions.
 

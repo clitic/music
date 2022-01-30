@@ -1,7 +1,7 @@
 # Current Music Trends :material-music:
 
 [:material-download: JSON](/current-music-trends/data.json){ .md-button .md-button--primary }
-[:material-youtube: Playlist](https://www.youtube.com/playlist?list=PLQeIlACGt47P3nQEVGWmaU3669iw6q7mQ){ .md-button .md-button--primary }
+[:material-youtube: Playlist](https://www.youtube.com/playlist?list=PLv5KLCzERve6UI32k8kvAcUY077i3VWE6){ .md-button .md-button--primary }
 
 Last Updated <!-- $timestamp --> (daily at utc midnight)
 

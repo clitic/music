@@ -60,7 +60,7 @@ class MarkdownFile:
         """flush updated variable values into MarkdownFile.text property
         """
         for var, var_text in self.variable_data.items():
-            self.text = re.sub(rf"<!--\s\${var}\s-->", var_text, self.text)    
+            self.text = self.text.replace(f"<!-- ${var} -->", var_text)    
 
     def save(self, filepath: str):
         """save new markdown file on disk

@@ -99,7 +99,7 @@ def write_docs(mv_ids: List[str], id_counter: Counter, mv_ids_level2: list, vide
     for video in videos_data:
         try:
             videos_days_to_views_ratio.append([utils.utc_seconds() / (video.views - old_mv_views[video.id]), video.id])
-        except KeyError:
+        except (KeyError, ZeroDivisionError) as e:
             pass
             
     videos_days_to_views_ratio = sorted(videos_days_to_views_ratio)

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trending Music</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
+    <h1 class="text-4xl font-bold mb-6">🔥 Trending Music 🔥</h1>
+    
+    <div class="mb-6 flex flex-wrap gap-2">
+        <button id="sort-by-views" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg mr-2">Sort by Views</button>
+        <button id="sort-by-likes" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg mr-2">Sort by Likes</button>
+        <button id="sort-by-comments" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg mr-2">Sort by Comments</button>
+        <button id="load-new-data" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Newly Added</button>
+    </div>
+
+    <div class="w-full max-w-lg space-y-4" id="music-list">
+        <!-- Songs will be injected here -->
+    </div>
+
+    <script>
+        function formatNumber(value) {
+            if (value >= 1_000_000_000) {
+                return (value / 1_000_000_000).toFixed(1) + " B";
+            } else if (value >= 1_000_000) {
+                return (value / 1_000_000).toFixed(1) + " M";
+            } else if (value >= 1_000) {
+                return (value / 1_000).toFixed(1) + " K";
+            } else {
+                return value;
+            }
+        }
+
+        let trendingSongs = [];
+
+        function renderSongs() {
+            const musicList = document.getElementById("music-list");
+            musicList.innerHTML = '';
+
+            trendingSongs.forEach((song, index) => {
+                const card = document.createElement("div");
+                card.className = "p-4 flex flex-col items-start bg-gray-800 shadow-lg rounded-lg hover:bg-gray-700 transition cursor-pointer";
+                card.onclick = () => window.open("https://youtu.be/" + song.id, "_blank");
+
+                const songInfo = document.createElement("div");
+                songInfo.innerHTML = `
+                    <span class='font-semibold text-lg'>${index + 1}. ${song.title}</span><br>
+                    <span class='text-sm text-gray-400'>🔎 ${formatNumber(song.view_count)}</span>
+                    <span class='text-sm text-gray-400'>❤️ ${formatNumber(song.like_count)}</span>
+                    <span class='text-sm text-gray-400'>💬 ${formatNumber(song.comment_count)}</span>
+                `;
+
+                card.appendChild(songInfo);
+                musicList.appendChild(card);
+            });
+        }
+
+        function sortSongs(criteria) {
+            if (criteria === 'views') {
+                trendingSongs.sort((a, b) => b.view_count - a.view_count);
+            } else if (criteria === 'likes') {
+                trendingSongs.sort((a, b) => b.like_count - a.like_count);
+            } else if (criteria === 'comments') {
+                trendingSongs.sort((a, b) => b.comment_count - a.comment_count);
+            }
+            renderSongs();
+        }
+
+        function loadData(filename) {
+            fetch(filename)
+                .then(response => response.json())
+                .then(data => {
+                    trendingSongs = data;
+                    renderSongs();
+                })
+                .catch(error => {
+                    console.error('Error loading songs:', error);
+                });
+        }
+
+        function toggleData() {
+            const newData = document.getElementById("load-new-data");
+
+            if (newData.innerText === "Newly Added") {
+                loadData('data_new.json');
+                newData.innerText = "All Videos";
+            } else {
+                loadData('data.json');
+                newData.innerText = "Newly Added";
+            }
+        }
+
+        document.getElementById("sort-by-views").addEventListener("click", () => sortSongs('views'));
+        document.getElementById("sort-by-likes").addEventListener("click", () => sortSongs('likes'));
+        document.getElementById("sort-by-comments").addEventListener("click", () => sortSongs('comments'));
+        document.getElementById("load-new-data").addEventListener("click", () => toggleData());
+
+        loadData('data.json');
+    </script>
+</body>
+
+</html>

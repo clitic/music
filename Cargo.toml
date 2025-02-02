@@ -1,5 +1,5 @@
 [package]
-name = "trending_music"
+name = "music"
 version = "0.1.0"
 edition = "2021"
 

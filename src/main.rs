@@ -1,8 +1,7 @@
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashSet;
-use std::hash::{Hash, Hasher};
+use std::{hash::{Hash, Hasher}, collections::HashSet};
 
 #[derive(Clone, Debug, Deserialize, Eq, Serialize)]
 struct Video {

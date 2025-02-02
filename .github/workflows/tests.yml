@@ -2,9 +2,9 @@ name: tests
 
 on:
   push:
-    branches: ["mains"]
+    branches: ["main"]
   pull_request:
-    branches: ["mains"]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always

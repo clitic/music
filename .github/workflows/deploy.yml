@@ -17,16 +17,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Git
+      - name: Set up git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
       - name: Create and switch to gh-pages branch
         run: git checkout -b gh-pages
+      - name: Delete files
+        run: rm -r .gitignore src Cargo.toml
       - name: Generate data
         run: |
           cargo install --git https://github.com/clitic/trending-music
           /home/runner/.cargo/bin/trending_music
-      - name: Push changes to gh-pages
+      - name: Commit and push changes to gh-pages
         run: |
+          git add -A
+          git commit -am "data.json"
           git push origin gh-pages

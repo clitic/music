@@ -25,17 +25,12 @@ jobs:
         run: |
           if git ls-remote --exit-code --heads origin gh-pages; then
             echo "Branch exists, checking out..."
-            git checkout gh-pages
+            git switch gh-pages
           else
             echo "Branch does not exist, creating..."
             git checkout -b gh-pages
+            rm -r .github .gitignore src Cargo.toml
           fi
-      - name: Delete files
-        run: rm -r .github .gitignore src Cargo.toml
-      - name: Install trending_music
-        run: cargo install --git https://github.com/clitic/trending-music
-      - name: Run trending_music
-        run: /home/runner/.cargo/bin/trending_music
       - name: Commit and push changes to gh-pages
         run: |
           git add -A

@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+env:
+  CARGO_TERM_COLOR: always
+  YT_API_KEY: ${{ secrets.YT_API_KEY }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -13,4 +17,4 @@ jobs:
       - uses: actions/checkout@v3
       - run: cargo install --git https://github.com/clitic/trending-music
       - run: /home/runner/.cargo/bin/trending_music
-      - run: ls
+      - run: ls && pwd

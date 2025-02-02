@@ -2,14 +2,21 @@ use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Serialize)]
 struct Video {
     comment_count: usize,
     id: String,
     like_count: usize,
     title: String,
     view_count: usize,
+}
+
+impl Hash for Video {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 impl PartialEq for Video {

@@ -32,6 +32,10 @@ jobs:
             git checkout -b gh-pages
             rm -r .github .gitignore src Cargo.toml
           fi
+      - name: Install trending_music
+        run: cargo install --git https://github.com/clitic/trending-music
+      - name: Run trending_music
+        run: /home/runner/.cargo/bin/trending_music
       - name: Commit and push changes to gh-pages
         run: |
           git add -A

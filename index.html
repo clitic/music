@@ -10,19 +10,67 @@
 
 <body class="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
     <h1 class="text-4xl font-bold mb-6">🔥 Trending Music 🔥</h1>
-    
+    <p class="text-lg text-center text-gray-300 mb-6">
+        A website which lists trending music from YouTube across all of its regions.</br>
+        List is updated at IST midnight i.e. <span id="countdown"></span> from now.
+    </p>
+
     <div class="mb-6 flex flex-wrap gap-2">
-        <button id="sort-by-views" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg mr-2">Sort by Views</button>
-        <button id="sort-by-likes" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg mr-2">Sort by Likes</button>
-        <button id="sort-by-comments" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg mr-2">Sort by Comments</button>
-        <button id="load-new-data" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Newly Added</button>
+        <select id="sort-by" class="appearance-none px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg cursor-pointer">
+            <option value="views">Sort by Views</option>
+            <option value="likes">Sort by Likes</option>
+            <option value="comments">Sort by Comments</option>
+            <option value="frequency">Sort by Region Coverage</option>
+        </select>
+
+        <button id="toggle-data" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Newly Added</button>
+        <a href="https://github.com/clitic/music" target="_blank" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">Source Code</a>
+        <a href="https://raw.githubusercontent.com/clitic/music/refs/heads/gh-pages/data.json" target="_blank" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg">JSON</a>
     </div>
 
     <div class="w-full max-w-lg space-y-4" id="music-list">
-        <!-- Songs will be injected here -->
+        <!-- data will be injected here -->
     </div>
 
     <script>
+        function sortData(criteria) {
+            if (criteria === "views") {
+                data.sort((a, b) => b.view_count - a.view_count);
+            } else if (criteria === "likes") {
+                data.sort((a, b) => b.like_count - a.like_count);
+            } else if (criteria === "comments") {
+                data.sort((a, b) => b.comment_count - a.comment_count);
+            } else if (criteria === "frequency") {
+                data.sort((a, b) => b.frequency - a.frequency);
+            }
+            renderData();
+        }
+
+        function loadData(filename) {
+            fetch(filename)
+                .then(response => response.json())
+                .then(xdata => {
+                    data = xdata;
+                    sortData(document.getElementById("sort-by").value)
+                    renderData();
+                })
+                .catch(error => {
+                    console.error("Error loading songs:", error);
+                });
+        }
+
+        function toggleData() {
+            const newlyAddedBtn = document.getElementById("toggle-data");
+
+            if (newlyAddedBtn.innerText === "Newly Added") {
+                loadData("data-newly-added.json");
+                newlyAddedBtn.innerText = "All Videos";
+            } else {
+                loadData("data.json");
+                newlyAddedBtn.innerText = "Newly Added";
+            }
+        }
+
         function formatNumber(value) {
             if (value >= 1_000_000_000) {
                 return (value / 1_000_000_000).toFixed(1) + " B";
@@ -35,24 +83,22 @@
             }
         }
 
-        let trendingSongs = [];
-
-        function renderSongs() {
+        function renderData() {
             const musicList = document.getElementById("music-list");
-            musicList.innerHTML = '';
+            musicList.innerHTML = "";
 
-            trendingSongs.forEach((song, index) => {
+            data.forEach((song, index) => {
                 const card = document.createElement("div");
                 card.className = "p-4 flex flex-col items-start bg-gray-800 shadow-lg rounded-lg hover:bg-gray-700 transition cursor-pointer";
                 card.onclick = () => window.open("https://youtu.be/" + song.id, "_blank");
 
                 const songInfo = document.createElement("div");
                 songInfo.innerHTML = `
-                    <span class='font-semibold text-lg'>${index + 1}. ${song.title}</span><br>
-                    <span class='text-sm text-gray-400'>🔎 ${formatNumber(song.view_count)}</span>
-                    <span class='text-sm text-gray-400'>❤️ ${formatNumber(song.like_count)}</span>
-                    <span class='text-sm text-gray-400'>💬 ${formatNumber(song.comment_count)}</span>
-                    <span class='text-sm text-gray-400'>🌍 ${song.frequency.toFixed(1)} %</span>
+                    <span class="font-semibold text-lg">${index + 1}. ${song.title}</span><br>
+                    <span class="text-sm text-gray-400">🔎 ${formatNumber(song.view_count)}</span>
+                    <span class="text-sm text-gray-400">❤️ ${formatNumber(song.like_count)}</span>
+                    <span class="text-sm text-gray-400">💬 ${formatNumber(song.comment_count)}</span>
+                    <span class="text-sm text-gray-400">🌍 ${song.frequency.toFixed(1)} %</span>
                 `;
 
                 card.appendChild(songInfo);
@@ -60,47 +106,28 @@
             });
         }
 
-        function sortSongs(criteria) {
-            if (criteria === 'views') {
-                trendingSongs.sort((a, b) => b.view_count - a.view_count);
-            } else if (criteria === 'likes') {
-                trendingSongs.sort((a, b) => b.like_count - a.like_count);
-            } else if (criteria === 'comments') {
-                trendingSongs.sort((a, b) => b.comment_count - a.comment_count);
+        function istMidnightCountdown() {
+            const now = new Date();
+            const midnight = new Date();
+            midnight.setUTCHours(18, 30, 0, 0);
+            if (now > midnight) {
+                midnight.setDate(midnight.getDate() + 1);
             }
-            renderSongs();
+
+            const diff = midnight - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById("countdown").innerText = `${hours}h ${minutes}m`;
         }
 
-        function loadData(filename) {
-            fetch(filename)
-                .then(response => response.json())
-                .then(data => {
-                    trendingSongs = data;
-                    renderSongs();
-                })
-                .catch(error => {
-                    console.error('Error loading songs:', error);
-                });
-        }
-
-        function toggleData() {
-            const newData = document.getElementById("load-new-data");
-
-            if (newData.innerText === "Newly Added") {
-                loadData('data-newly-added.json');
-                newData.innerText = "All Videos";
-            } else {
-                loadData('data.json');
-                newData.innerText = "Newly Added";
-            }
-        }
-
-        document.getElementById("sort-by-views").addEventListener("click", () => sortSongs('views'));
-        document.getElementById("sort-by-likes").addEventListener("click", () => sortSongs('likes'));
-        document.getElementById("sort-by-comments").addEventListener("click", () => sortSongs('comments'));
-        document.getElementById("load-new-data").addEventListener("click", () => toggleData());
-
-        loadData('data.json');
+        let data = [];
+        document.getElementById("sort-by").addEventListener("change", (event) => {
+            sortData(event.target.value);
+        });
+        document.getElementById("toggle-data").addEventListener("click", () => toggleData());
+        setInterval(istMidnightCountdown, 60000);
+        istMidnightCountdown();
+        loadData("data.json");
     </script>
 </body>
 

@@ -52,6 +52,7 @@
                     <span class='text-sm text-gray-400'>🔎 ${formatNumber(song.view_count)}</span>
                     <span class='text-sm text-gray-400'>❤️ ${formatNumber(song.like_count)}</span>
                     <span class='text-sm text-gray-400'>💬 ${formatNumber(song.comment_count)}</span>
+                    <span class='text-sm text-gray-400'>🌍 ${song.frequency.toFixed(1)} %</span>
                 `;
 
                 card.appendChild(songInfo);
@@ -86,7 +87,7 @@
             const newData = document.getElementById("load-new-data");
 
             if (newData.innerText === "Newly Added") {
-                loadData('data_new.json');
+                loadData('data-newly-added.json');
                 newData.innerText = "All Videos";
             } else {
                 loadData('data.json');

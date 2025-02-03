@@ -2,5 +2,4 @@
 Cargo.lock
 **/*.rs.bk
 data.json
-data_new.json
-data_old.json
+data-newly-added.json

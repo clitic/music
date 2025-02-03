@@ -1,38 +1,22 @@
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{hash::{Hash, Hasher}, collections::HashSet};
 
-#[derive(Clone, Debug, Deserialize, Eq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 struct Video {
     comment_count: usize,
+    frequency: f32,
     id: String,
     like_count: usize,
     title: String,
     view_count: usize,
 }
 
-impl Hash for Video {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
-
-impl PartialEq for Video {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        self.id != other.id
-    }
-}
-
 fn main() {
     let key = std::env::var("YT_API_KEY").expect("YT_API_KEY env variable not defined");
     let client = Client::new();
 
-    println!("Fetching available regions");
+    println!("Querying available regions");
 
     // https://developers.google.com/youtube/v3/docs/i18nRegions/list
     let res = client
@@ -55,7 +39,7 @@ fn main() {
 
     println!("Total {} regions found", regions_count);
 
-    let mut all_videos = HashSet::new();
+    let mut data_fresh: Vec<Video> = Vec::new();
 
     for (i, region) in regions.iter().enumerate() {
         println!(
@@ -65,7 +49,7 @@ fn main() {
             region
         );
 
-        // https://developers.google.com/youtube/v3/docs/i18nRegions/list
+        // https://developers.google.com/youtube/v3/docs/videos/list
         let res = client
             .get("https://www.googleapis.com/youtube/v3/videos")
             .query(&[
@@ -86,59 +70,76 @@ fn main() {
             continue;
         }
 
-        let videos = data["items"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|x| Video {
-                comment_count: x["statistics"]["commentCount"]
+        for item in data["items"].as_array().unwrap().iter() {
+            let id = item["id"].as_str().unwrap().to_owned();
+
+            if let Some(video) = data_fresh.iter_mut().find(|x| (**x).id == id) {
+                video.frequency += 1.0;
+                continue;
+            }
+
+            let video = Video {
+                comment_count: item["statistics"]["commentCount"]
                     .as_str()
                     .unwrap_or("0")
                     .parse::<usize>()
                     .unwrap(),
-                id: x["id"].as_str().unwrap().to_owned(),
-                like_count: x["statistics"]["likeCount"]
+                frequency: 1.0,
+                id,
+                like_count: item["statistics"]["likeCount"]
                     .as_str()
                     .unwrap_or("0")
                     .parse::<usize>()
                     .unwrap(),
-                title: x["snippet"]["title"]
+                title: item["snippet"]["title"]
                     .as_str()
                     .unwrap_or("Unknown Title")
                     .to_owned(),
-                view_count: x["statistics"]["viewCount"]
+                view_count: item["statistics"]["viewCount"]
                     .as_str()
                     .unwrap_or("0")
                     .parse::<usize>()
                     .unwrap(),
-            })
-            .collect::<HashSet<Video>>();
+            };
 
-        all_videos.extend(videos);
+            data_fresh.push(video);
+        }
     }
 
-    println!("Total {} videos information was fetched", all_videos.len());
+    println!("Total {} unique videos information was fetched", data_fresh.len());
+    
+    // Filtering and sorting data
+    
+    data_fresh = data_fresh.into_iter().filter_map(|mut x| {
+        if x.frequency >= 2.0 {
+            x.frequency = (x.frequency / regions_count as f32) * 100.;
+            Some(x)
+        } else {
+            None
+        }
+    }).collect();
+    println!("After filtering only {} unique videos are kept", data_fresh.len());
+    data_fresh.sort_by(|a, b| b.view_count.cmp(&a.view_count));
 
     if std::fs::exists("data.json").unwrap() {
-        std::fs::copy("data.json", "data_old.json").unwrap();
+        let file = std::fs::read("data.json").unwrap();
+        let data_old = serde_json::from_slice::<Vec<Video>>(&file).unwrap();
+        let mut data_new = Vec::new();
 
-        let file = std::fs::read("data_old.json").unwrap();
-        let data_old = serde_json::from_slice::<HashSet<Video>>(&file).unwrap();
+        for video in &data_fresh {
+            if data_old.iter().find(|x| (**x).id == video.id).is_none() {
+                data_new.push(video.clone());
+            }
+        }
 
-        let mut data_new = all_videos
-            .difference(&all_videos.intersection(&data_old).cloned().collect())
-            .cloned()
-            .into_iter()
-            .collect::<Vec<Video>>();
+        println!("Total {} unique videos new videos are added", data_new.len());
         data_new.sort_by(|a, b| b.view_count.cmp(&a.view_count));
 
-        let file = std::fs::File::create("data_new.json").unwrap();
+        let file = std::fs::File::create("data-newly-added.json").unwrap();
         serde_json::to_writer(file, &data_new).unwrap();
     }
 
-    let mut all_videos = all_videos.into_iter().collect::<Vec<Video>>();
-    all_videos.sort_by(|a, b| b.view_count.cmp(&a.view_count));
-
     let file = std::fs::File::create("data.json").unwrap();
-    serde_json::to_writer(file, &all_videos).unwrap();
+    serde_json::to_writer(file, &data_fresh).unwrap();
+    println!("Task completed successfully");
 }

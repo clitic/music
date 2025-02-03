@@ -56,7 +56,7 @@ fn main() {
                 ("part", "statistics,snippet"),
                 ("chart", "mostPopular"),
                 ("maxResults", "50"),
-                ("regionCode", &region),
+                ("regionCode", region),
                 ("videoCategoryId", "10"),
                 ("key", &key),
             ])
@@ -73,7 +73,7 @@ fn main() {
         for item in data["items"].as_array().unwrap().iter() {
             let id = item["id"].as_str().unwrap().to_owned();
 
-            if let Some(video) = data_fresh.iter_mut().find(|x| (**x).id == id) {
+            if let Some(video) = data_fresh.iter_mut().find(|x| x.id == id) {
                 video.frequency += 1.0;
                 continue;
             }
@@ -106,19 +106,28 @@ fn main() {
         }
     }
 
-    println!("Total {} unique videos information was fetched", data_fresh.len());
-    
+    println!(
+        "Total {} unique videos information was fetched",
+        data_fresh.len()
+    );
+
     // Filtering and sorting data
-    
-    data_fresh = data_fresh.into_iter().filter_map(|mut x| {
-        if x.frequency >= 2.0 {
-            x.frequency = (x.frequency / regions_count as f32) * 100.;
-            Some(x)
-        } else {
-            None
-        }
-    }).collect();
-    println!("After filtering only {} unique videos are kept", data_fresh.len());
+
+    data_fresh = data_fresh
+        .into_iter()
+        .filter_map(|mut x| {
+            if x.frequency >= 2.0 {
+                x.frequency = (x.frequency / regions_count as f32) * 100.;
+                Some(x)
+            } else {
+                None
+            }
+        })
+        .collect();
+    println!(
+        "After filtering only {} unique videos are kept",
+        data_fresh.len()
+    );
     data_fresh.sort_by(|a, b| b.view_count.cmp(&a.view_count));
 
     if std::fs::exists("data.json").unwrap() {
@@ -127,12 +136,15 @@ fn main() {
         let mut data_new = Vec::new();
 
         for video in &data_fresh {
-            if data_old.iter().find(|x| (**x).id == video.id).is_none() {
+            if !data_old.iter().any(|x| x.id == video.id) {
                 data_new.push(video.clone());
             }
         }
 
-        println!("Total {} unique videos new videos are added", data_new.len());
+        println!(
+            "Total {} unique videos new videos are added",
+            data_new.len()
+        );
         data_new.sort_by(|a, b| b.view_count.cmp(&a.view_count));
 
         let file = std::fs::File::create("data-newly-added.json").unwrap();

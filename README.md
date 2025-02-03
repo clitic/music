@@ -10,6 +10,6 @@
   </a>
 </p>
 
-A website which lists trending music from youtube across all of its regions. List can be sorted on basis of views, likes and comments. There is also a newly added filter. Website automatically updates at ist midnight.
+A website which lists trending music from youtube across all of its regions. List can be sorted on basis of views, likes, comments and region coverage. There is also a newly added filter. Website automatically updates at IST midnight.
 
 You can [click here](https://clitic.github.io/music) to visit the website.

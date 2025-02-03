@@ -39,5 +39,5 @@ jobs:
       - name: Commit and push changes to gh-pages
         run: |
           git add -A
-          git commit -am "updated data.json"
+          git commit -am "updated data.json & data-newly-added.json"
           git push origin gh-pages

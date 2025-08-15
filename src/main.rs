@@ -57,7 +57,7 @@ fn main() {
                 ("chart", "mostPopular"),
                 ("maxResults", "50"),
                 ("regionCode", region),
-                ("videoCategoryId", "10"),
+                ("videoCategoryId", "10"), // https://developers.google.com/youtube/v3/docs/videoCategories/list
                 ("key", &key),
             ])
             .send()

@@ -12,7 +12,7 @@
     <h1 class="text-4xl font-bold mb-6">🔥 Trending Music 🔥</h1>
     <p class="text-lg text-center text-gray-300 mb-6">
         A website which lists trending music from YouTube across all of its regions.</br>
-        List is updated at IST midnight i.e. <span id="countdown"></span> from now.
+        <span id="last_updated_on"></span> (🔄 IST midnight)
     </p>
 
     <div class="mb-6 flex flex-wrap gap-2">
@@ -24,8 +24,10 @@
         </select>
 
         <button id="toggle-data" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Newly Added</button>
-        <a href="https://github.com/clitic/music" target="_blank" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">Source Code</a>
-        <a href="https://raw.githubusercontent.com/clitic/music/refs/heads/gh-pages/data.json" target="_blank" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg">JSON</a>
+        <a href="https://github.com/clitic/music" target="_blank"
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">Source Code</a>
+        <a href="https://raw.githubusercontent.com/clitic/music/refs/heads/gh-pages/data.json" target="_blank"
+            class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg">JSON</a>
     </div>
 
     <div class="w-full max-w-lg space-y-4" id="music-list">
@@ -84,7 +86,7 @@
                 const card = document.createElement("div");
                 card.className = "p-4 flex items-center bg-gray-800 shadow-lg rounded-lg hover:bg-gray-700 transition cursor-pointer";
                 card.onclick = () => window.open("https://youtu.be/" + song.id, "_blank");
-                
+
                 const songInfo = document.createElement("div");
                 songInfo.className = "flex-1";
                 songInfo.innerHTML = `
@@ -94,12 +96,12 @@
                     <span class="text-sm text-gray-400">💬 ${formatNumber(song.comment_count)}</span>
                     <span class="text-sm text-gray-400">🌍 ${song.frequency.toFixed(1)} %</span>
                 `;
-                
+
                 const thumbnail = document.createElement("img");
                 thumbnail.className = "w-20 h-20 rounded-lg object-cover ml-4";
                 thumbnail.src = "https://img.youtube.com/vi/" + song.id + "/hqdefault.jpg";
                 thumbnail.loading = "lazy";
-                
+
                 card.appendChild(songInfo);
                 card.appendChild(thumbnail);
                 musicList.appendChild(card);
@@ -117,11 +119,33 @@
             document.getElementById("countdown").innerText = `${hours}h ${minutes}m`;
         }
 
+        async function lastUpdate() {
+            const res = await fetch("https://api.github.com/repos/clitic/music/commits?sha=gh-pages&per_page=1");
+            const [commit] = await res.json();
+
+            const commitISO = commit.commit?.committer?.date || commit.commit?.author?.date;
+            const now = Date.now();
+            const then = new Date(commitISO).getTime();
+            const diffMs = Math.max(0, now - then);
+
+            const totalMinutes = Math.floor(diffMs / 60000);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+
+            let result = "Last update ";
+            if (hours > 0) result += `${hours} hr${hours > 1 ? "s" : ""} `;
+            if (minutes > 0) result += `${minutes} min${minutes > 1 ? "s" : ""} `;
+            if (hours === 0 && minutes === 0) result += "just now";
+            else result += "ago";
+
+            document.getElementById("last_updated_on").innerText = result.trim();
+        }
+
         let data = [];
         document.getElementById("sort-by").addEventListener("change", event => sortData(event.target.value));
         document.getElementById("toggle-data").addEventListener("click", toggleData);
-        setInterval(istMidnightCountdown, 60000);
-        istMidnightCountdown();
+        setInterval(lastUpdate, 60000);
+        lastUpdate();
         loadData("data.json");
     </script>
 </body>

@@ -1,153 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Trending music from YouTube across all regions.">
+    <meta name="theme-color" content="#0f0f0f">
     <title>Trending Music</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="src/style.css">
 </head>
 
-<body class="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
-    <h1 class="text-4xl font-bold mb-6">🔥 Trending Music 🔥</h1>
-    <p class="text-lg text-center text-gray-300 mb-6">
-        A website which lists trending music from YouTube across all of its regions.</br>
-        <span id="last_updated_on"></span> (🔄 IST midnight)
-    </p>
+<body>
+    <!-- Dropdown backdrop for mobile -->
+    <div id="dropdown-backdrop" class="dropdown-backdrop"></div>
 
-    <div class="mb-6 flex flex-wrap gap-2">
-        <select id="sort-by" class="appearance-none px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg cursor-pointer">
-            <option value="views">Sort by Views</option>
-            <option value="likes">Sort by Likes</option>
-            <option value="comments">Sort by Comments</option>
-            <option value="frequency">Sort by Region Coverage</option>
-        </select>
+    <!-- ─── Header ─── -->
+    <header class="header">
+        <div class="header-logo">
+            <svg viewBox="0 0 28 20" xmlns="http://www.w3.org/2000/svg">
+                <rect width="28" height="20" rx="4" fill="#FF0000"/>
+                <polygon points="11,4 11,16 21,10" fill="#fff"/>
+            </svg>
+            <span>Trending Music</span>
+        </div>
 
-        <button id="toggle-data" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Newly Added</button>
-        <a href="https://github.com/clitic/music" target="_blank"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">Source Code</a>
-        <a href="https://raw.githubusercontent.com/clitic/music/refs/heads/gh-pages/data.json" target="_blank"
-            class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg">JSON</a>
-    </div>
+        <div class="header-actions">
+            <!-- Source code link -->
+            <a href="https://github.com/clitic/music" target="_blank" rel="noopener" class="icon-btn" aria-label="Source Code">
+                <svg viewBox="0 0 24 24"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+                <span class="tooltip">Source Code</span>
+            </a>
 
-    <div class="w-full max-w-lg space-y-4" id="music-list">
-        <!-- data will be injected here -->
-    </div>
+            <!-- Theme toggle -->
+            <button id="theme-btn" class="icon-btn" aria-label="Toggle Theme">
+                <span id="theme-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+                </span>
+                <span class="tooltip">Theme</span>
+            </button>
+        </div>
+    </header>
 
-    <script>
-        function sortData(criteria) {
-            if (criteria === "views") {
-                data.sort((a, b) => b.view_count - a.view_count);
-            } else if (criteria === "likes") {
-                data.sort((a, b) => b.like_count - a.like_count);
-            } else if (criteria === "comments") {
-                data.sort((a, b) => b.comment_count - a.comment_count);
-            } else if (criteria === "frequency") {
-                data.sort((a, b) => b.frequency - a.frequency);
-            }
-            renderData();
-        }
+    <!-- ─── Playlist ─── -->
+    <main class="main">
+        <!-- Tabs + Sort bar -->
+        <div class="playlist-toolbar">
+            <div class="tab-bar" role="tablist">
+                <button class="tab active" data-file="data.json" role="tab" aria-selected="true">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                    <span>All Videos</span>
+                </button>
+                <button class="tab" data-file="data-newly-added.json" role="tab" aria-selected="false">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-10 5h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    <span>Newly Added</span>
+                </button>
+            </div>
 
-        function loadData(filename) {
-            fetch(filename)
-                .then(response => response.json())
-                .then(xdata => {
-                    data = xdata;
-                    sortData(document.getElementById("sort-by").value);
-                })
-                .catch(error => {
-                    console.error("Error loading songs:", error);
-                });
-        }
+            <!-- Sort dropdown -->
+            <div id="sort-dropdown" class="dropdown" data-action="sort">
+                <button id="sort-trigger" class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/></svg>
+                    <span id="sort-label" class="dropdown-label">Views</span>
+                    <svg class="arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="dropdown-menu" role="listbox">
+                    <div class="dropdown-item selected" data-value="views" role="option">
+                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                        Views
+                        <svg class="check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="dropdown-item" data-value="likes" role="option">
+                        <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                        Likes
+                        <svg class="check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="dropdown-item" data-value="comments" role="option">
+                        <svg viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
+                        Comments
+                        <svg class="check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="dropdown-item" data-value="frequency" role="option">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Region Coverage
+                        <svg class="check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        function toggleData() {
-            const newlyAddedBtn = document.getElementById("toggle-data");
-            if (newlyAddedBtn.innerText === "Newly Added") {
-                loadData("data-newly-added.json");
-                newlyAddedBtn.innerText = "All Videos";
-            } else {
-                loadData("data.json");
-                newlyAddedBtn.innerText = "Newly Added";
-            }
-        }
+        <!-- Track count -->
+        <div class="playlist-header">
+            <div id="playlist-subtitle" class="playlist-subtitle">Loading…</div>
+        </div>
 
-        function formatNumber(value) {
-            if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + " B";
-            if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + " M";
-            if (value >= 1_000) return (value / 1_000).toFixed(1) + " K";
-            return value;
-        }
+        <!-- Scrollable list -->
+        <div id="playlist-scroll" class="playlist-scroll">
+            <div class="empty-state">
+                <div class="loader"></div>
+                <span>Loading tracks…</span>
+            </div>
+        </div>
+    </main>
 
-        function renderData() {
-            const musicList = document.getElementById("music-list");
-            musicList.innerHTML = "";
+    <!-- ─── Footer ─── -->
+    <footer class="update-bar">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="opacity:0.6"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+        <span id="last-updated">Loading…</span>
+    </footer>
 
-            data.forEach((song, index) => {
-                const card = document.createElement("div");
-                card.className = "p-4 flex items-center bg-gray-800 shadow-lg rounded-lg hover:bg-gray-700 transition cursor-pointer";
-                card.onclick = () => window.open("https://youtu.be/" + song.id, "_blank");
-
-                const songInfo = document.createElement("div");
-                songInfo.className = "flex-1";
-                songInfo.innerHTML = `
-                    <span class="font-semibold text-lg">${index + 1}. ${song.title}</span><br>
-                    <span class="text-sm text-gray-400">🔎 ${formatNumber(song.view_count)}</span>
-                    <span class="text-sm text-gray-400">❤️ ${formatNumber(song.like_count)}</span>
-                    <span class="text-sm text-gray-400">💬 ${formatNumber(song.comment_count)}</span>
-                    <span class="text-sm text-gray-400">🌍 ${song.frequency.toFixed(1)} %</span>
-                `;
-
-                const thumbnail = document.createElement("img");
-                thumbnail.className = "w-20 h-20 rounded-lg object-cover ml-4";
-                thumbnail.src = "https://img.youtube.com/vi/" + song.id + "/hqdefault.jpg";
-                thumbnail.loading = "lazy";
-
-                card.appendChild(songInfo);
-                card.appendChild(thumbnail);
-                musicList.appendChild(card);
-            });
-        }
-
-        function istMidnightCountdown() {
-            const now = new Date();
-            const midnight = new Date();
-            midnight.setUTCHours(18, 30, 0, 0);
-            if (now > midnight) midnight.setDate(midnight.getDate() + 1);
-            const diff = midnight - now;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById("countdown").innerText = `${hours}h ${minutes}m`;
-        }
-
-        async function lastUpdate() {
-            const res = await fetch("https://api.github.com/repos/clitic/music/commits?sha=gh-pages&per_page=1");
-            const [commit] = await res.json();
-
-            const commitISO = commit.commit?.committer?.date || commit.commit?.author?.date;
-            const now = Date.now();
-            const then = new Date(commitISO).getTime();
-            const diffMs = Math.max(0, now - then);
-
-            const totalMinutes = Math.floor(diffMs / 60000);
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-
-            let result = "Last update ";
-            if (hours > 0) result += `${hours} hr${hours > 1 ? "s" : ""} `;
-            if (minutes > 0) result += `${minutes} min${minutes > 1 ? "s" : ""} `;
-            if (hours === 0 && minutes === 0) result += "just now";
-            else result += "ago";
-
-            document.getElementById("last_updated_on").innerText = result.trim();
-        }
-
-        let data = [];
-        document.getElementById("sort-by").addEventListener("change", event => sortData(event.target.value));
-        document.getElementById("toggle-data").addEventListener("click", toggleData);
-        setInterval(lastUpdate, 60000);
-        lastUpdate();
-        loadData("data.json");
-    </script>
+    <script src="src/app.js"></script>
 </body>
 
 </html>

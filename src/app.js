@@ -277,13 +277,16 @@
     async function fetchLastUpdate() {
         try {
             const res = await fetch('https://api.github.com/repos/clitic/music/commits?sha=gh-pages&per_page=1');
-            const [commit] = await res.json();
-            const isoDate = commit.commit?.committer?.date || commit.commit?.author?.date;
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            if (!Array.isArray(json) || json.length === 0) throw new Error('No commits');
+            const isoDate = json[0].commit?.committer?.date || json[0].commit?.author?.date;
             if (lastUpdated && isoDate) {
                 lastUpdated.textContent = timeAgo(isoDate) + '  ·  Updates at IST midnight';
             }
-        } catch {
-            if (lastUpdated) lastUpdated.textContent = '';
+        } catch (err) {
+            console.warn('Last update fetch failed:', err);
+            if (lastUpdated) lastUpdated.textContent = 'Updates at IST midnight';
         }
     }
 

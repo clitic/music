@@ -6,46 +6,36 @@ on:
     - cron: "30 18 * * *"
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 env:
-  CARGO_TERM_COLOR: always
   YT_API_KEY: ${{ secrets.YT_API_KEY }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install
+      - name: Fetch trending data
+        run: bun run fetch
+      - name: Build
+        run: bun run build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
         with:
-          fetch-depth: 0
-
-      - name: Set up git
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-
-      - name: Create or switch to gh-pages branch
-        run: |
-          if git ls-remote --exit-code --heads origin gh-pages; then
-            git checkout gh-pages
-          else
-            git checkout --orphan gh-pages
-            git rm -rf .
-          fi
-
-      - name: Copy frontend files from main
-        run: |
-          git checkout main -- index.html src/
-
-      - name: Install and run music
-        run: |
-          cargo install --git https://github.com/clitic/music
-          /home/runner/.cargo/bin/music
-
-      - name: Commit and push
-        run: |
-          git add -A
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "automatic deploy"
-          git push origin gh-pages
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

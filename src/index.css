@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --color-bg-primary: #0f0f0f;
+    --color-bg-secondary: #212121;
+    --color-bg-hover: rgba(255, 255, 255, 0.1);
+    --color-bg-active: rgba(255, 255, 255, 0.15);
+    --color-text-primary: #f1f1f1;
+    --color-text-secondary: #aaaaaa;
+    --color-accent: #ff0033;
+    --color-accent-hover: #cc0029;
+    --color-divider: #303030;
+    --color-overlay: rgba(0, 0, 0, 0.6);
+    --animate-eq-bounce: eq-bounce 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes eq-bounce {
+    0% { transform: scaleY(0.3); }
+    100% { transform: scaleY(1); }
+}
+
+/* Theme overrides (CSS variable swaps — cannot be Tailwind utilities) */
+[data-theme="light"] {
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f2f2f2;
+    --color-bg-hover: rgba(0, 0, 0, 0.05);
+    --color-bg-active: rgba(0, 0, 0, 0.1);
+    --color-text-primary: #0f0f0f;
+    --color-text-secondary: #606060;
+    --color-divider: rgba(0, 0, 0, 0.1);
+    --color-overlay: rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: light) {
+    [data-theme="adaptive"] {
+        --color-bg-primary: #ffffff;
+        --color-bg-secondary: #f2f2f2;
+        --color-bg-hover: rgba(0, 0, 0, 0.05);
+        --color-bg-active: rgba(0, 0, 0, 0.1);
+        --color-text-primary: #0f0f0f;
+        --color-text-secondary: #606060;
+        --color-divider: rgba(0, 0, 0, 0.1);
+        --color-overlay: rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Scrollbar (no Tailwind utility exists) */
+* { scrollbar-width: thin; scrollbar-color: var(--color-bg-hover) transparent; }

@@ -1,15 +1,8 @@
 
-<h1 align="center">🔥 Trending Music 🔥</h1>
+<h1 align="center">YouTube Trending Music</h1>
 
-<p align="center">
-  <a href="https://github.com/clitic/music">
-    <img src="https://img.shields.io/github/actions/workflow/status/clitic/music/tests.yml?label=tests&logo=github&style=flat-square">
-  </a>
-  <a href="https://github.com/clitic/music">
-    <img src="https://img.shields.io/github/actions/workflow/status/clitic/music/deploy.yml?label=deploy&logo=github&style=flat-square">
-  </a>
-</p>
+[![Deploy](https://img.shields.io/github/actions/workflow/status/clitic/music/deploy.yml?label=deploy&logo=github&style=flat-square)](https://github.com/clitic/music)
 
-A website which lists trending music from youtube across all of its regions. List is automatically updated at IST midnight. List can be sorted on basis of views, likes, comments and region coverage. There is also a newly added filter. You can also download list in json format.
+A website that aggregates trending music videos from YouTube across all available regions. The data is automatically refreshed daily at IST midnight via GitHub Actions. Videos can be sorted by views, likes, comments, or region coverage and filtered to show only newly added tracks.
 
 You can [click here](https://clitic.github.io/music) to visit the website.

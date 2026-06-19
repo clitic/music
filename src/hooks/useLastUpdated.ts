@@ -9,17 +9,12 @@ export function useLastUpdated() {
 
     const fetchUpdate = async () => {
       try {
-        const res = await fetch(
-          "https://api.github.com/repos/clitic/music/commits?sha=gh-pages&per_page=1"
-        );
+        const res = await fetch("last-updated.json");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        if (cancelled) return;
-        if (!Array.isArray(json) || json.length === 0)
-          throw new Error("No commits");
-        const isoDate =
-          json[0].commit?.committer?.date || json[0].commit?.author?.date;
-        if (isoDate) setLastUpdated(timeAgo(isoDate));
+        const json: { updatedAt: string } = await res.json();
+        if (!cancelled && json.updatedAt) {
+          setLastUpdated(timeAgo(json.updatedAt));
+        }
       } catch {
         if (!cancelled) setLastUpdated("");
       }

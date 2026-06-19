@@ -145,6 +145,7 @@ async function main() {
   }
 
   await Bun.write(dataJsonPath, JSON.stringify(dataFresh));
+  await Bun.write("public/last-updated.json", JSON.stringify({ updatedAt: new Date().toISOString() }));
   console.log("Task completed successfully");
 }
 
